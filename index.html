@@ -1,0 +1,484 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Questionnaire lab</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Ctext y=%27.9em%27 font-size=%2790%27%3E%E2%9C%8D%EF%B8%8F%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@500;700&family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<!--
+  Questionnaire lab — Estudios de Mercado I, Tema 5 (Scales in marketing research, 5.4).
+
+  The method: decision -> what you need to learn -> the ANALYSIS each line feeds -> the SCALE
+  LEVEL that analysis needs (nominal / ordinal / interval / ratio) -> the questionnaire. The
+  scale is a real decision here (5.4): pick the highest level the concept honestly supports.
+
+  Everything runs in the browser. The page writes the prompt; the student takes it to whichever
+  assistant they use, brings the draft back, cuts it and checks it.
+-->
+<style>
+:root{
+  --ground:#F4F4F6; --surface:#FFFFFF; --sunk:#EAEAEF;
+  --ink:#16161D; --muted:#4A4A58; --line:#D9D9E3;
+  --ind:#3F3D8C; --ind-soft:#E7E6F5;
+  --a:#1F6F6B; --a-soft:#DDEFED; --b:#A4501E; --b-soft:#F7E7DA;
+  --ok:#2E7D5B; --ok-soft:#DEEFE7; --warn:#9A6B12; --warn-soft:#F6EBD6;
+}
+@media (prefers-color-scheme:dark){ :root:not([data-theme="light"]){
+  --ground:#101014; --surface:#1A1A21; --sunk:#15151B; --ink:#E9E9F0; --muted:#AFAFC0; --line:#2C2C38;
+  --ind:#A9A6F0; --ind-soft:#25233F; --a:#6FC7C1; --a-soft:#14302E; --b:#E0A377; --b-soft:#33231A;
+  --ok:#63BE95; --ok-soft:#13291F; --warn:#D9A649; --warn-soft:#2A2213;
+}}
+*{box-sizing:border-box}
+body{background:var(--ground);color:var(--ink);font-family:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  font-size:17px;line-height:1.6;margin:0;padding:0 clamp(16px,3vw,44px) 90px}
+.wrap{width:100%;max-width:1400px;margin:0 auto}
+h1,h2,h3{font-family:"Archivo Narrow","Arial Narrow",Arial,sans-serif}
+header{padding:30px 0 18px;border-bottom:2px solid var(--ink);margin-bottom:18px}
+.eyebrow{font-family:"IBM Plex Mono",monospace;font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--ind);margin:0 0 8px;font-weight:600}
+h1{font-size:clamp(32px,5vw,50px);line-height:1.05;margin:0 0 10px;font-weight:700}
+.sub{font-size:19px;margin:0;max-width:92ch}
+.plan{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+.plan span{font-family:"IBM Plex Mono",monospace;font-size:13px;padding:5px 11px;border:1px solid var(--line);border-radius:4px;color:var(--muted);background:var(--surface)}
+section{background:var(--surface);border:1px solid var(--line);border-radius:8px;margin-bottom:16px;padding:20px 24px}
+h2{font-size:25px;margin:0 0 4px}
+h2 .n{font-family:"IBM Plex Mono",monospace;font-size:15px;color:var(--ind);margin-right:10px}
+.hint{color:var(--muted);font-size:16px}
+label.f{display:block;font-size:15.5px;color:var(--muted);margin:14px 0 4px}
+input[type=text],textarea,select{width:100%;font-family:inherit;font-size:17px;color:var(--ink);background:var(--surface);
+  border:1.5px solid #A6A6B5;border-radius:6px;padding:11px 14px;min-height:48px}
+textarea{min-height:76px;resize:vertical}
+select{appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--muted) 50%),linear-gradient(135deg,var(--muted) 50%,transparent 50%);
+  background-position:calc(100% - 20px) 22px,calc(100% - 14px) 22px;background-size:6px 6px,6px 6px;background-repeat:no-repeat;padding-right:44px}
+input:focus,textarea:focus,select:focus{outline:3px solid rgba(63,61,140,.3);border-color:var(--ind)}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:0 22px}
+.need{display:grid;grid-template-columns:1fr 230px;gap:12px;align-items:end;margin-top:10px}
+@media (max-width:720px){ .need{grid-template-columns:1fr} }
+.opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:8px;margin-top:8px}
+.chk{display:flex;gap:9px;align-items:flex-start;border:1.5px solid var(--line);border-radius:6px;padding:9px 12px;cursor:pointer;font-size:16px}
+.chk:hover{border-color:var(--ind)} .chk.on{border-color:var(--ind);background:var(--ind-soft)}
+.chk input{margin-top:4px;width:18px;height:18px;accent-color:var(--ind)}
+.btn{font-family:inherit;font-size:17px;font-weight:600;padding:12px 22px;border:1.5px solid var(--ind);background:var(--surface);color:var(--ind);border-radius:6px;cursor:pointer}
+.btn:hover{background:var(--ind-soft)} .btn.solid{background:var(--ind);color:#fff}.btn.solid:hover{opacity:.9}
+.row{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-top:16px}
+pre.prompt{background:var(--sunk);border:1px solid var(--line);border-radius:8px;padding:16px 18px;white-space:pre-wrap;
+  font-family:"IBM Plex Mono",monospace;font-size:14.5px;line-height:1.55;max-height:420px;overflow:auto;margin:12px 0 0}
+.rules{background:var(--a-soft);border-left:5px solid var(--a);border-radius:6px;padding:12px 16px;margin-top:12px;font-size:16px}
+.rules b{display:block;font-family:"IBM Plex Mono",monospace;font-size:12.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--a);margin-bottom:4px}
+.note{background:var(--warn-soft);border:1px solid var(--warn);border-radius:8px;padding:12px 15px;margin-top:14px;font-size:16px}
+.check{display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-top:1px solid var(--line);font-size:16.5px}
+.check input{margin-top:4px;width:18px;height:18px;accent-color:var(--ok)}
+.score{background:var(--ok-soft);border:1px solid var(--ok);border-radius:8px;padding:10px 14px;margin-top:12px;font-size:16px}
+footer{margin-top:26px;color:var(--muted);font-size:14.5px}
+#printout{display:none}
+@media print{
+  @page{size:A4;margin:14mm 13mm}
+  body{background:#fff;color:#000;padding:0;font-size:10pt}
+  .wrap > :not(#printout){display:none!important}
+  #printout{display:block!important}
+  #printout h1{font-size:17pt;margin:0 0 2mm;border-bottom:1.5pt solid #000;padding-bottom:2mm}
+  #printout h2{font-size:11.5pt;margin:5mm 0 1.5mm;border-bottom:.5pt solid #999;padding-bottom:1mm}
+  #printout .id{font-size:10pt;margin:0 0 3mm}
+  #printout .blk{margin:2mm 0;page-break-inside:avoid}
+  #printout .blk b{display:block;font-size:8.5pt;text-transform:uppercase;letter-spacing:.05em;color:#444}
+  #printout pre{white-space:pre-wrap;font-family:monospace;font-size:8.5pt;line-height:1.35;margin:1mm 0}
+  #printout .foot{margin-top:6mm;font-size:8pt;color:#444;border-top:.5pt solid #999;padding-top:2mm}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <p class="eyebrow">Estudios de Mercado I · Tema 5 · Scales in marketing research (5.4)</p>
+  <h1>Questionnaire lab</h1>
+  <p class="sub">You make the decisions, the assistant writes the draft. The core of 5.4: for every line you
+  need to learn, choose the <b>analysis</b> it will end in — and that fixes the <b>scale level</b> the question
+  must use (nominal, ordinal, interval or ratio). Work backwards from the analysis to the scale, then let the
+  prompt write a clean questionnaire you cut and check.</p>
+  <div class="plan">
+    <span>1 · the decision</span><span>2 · needs → analysis → scale</span><span>3 · length & blocks</span><span>4 · the prompt</span>
+    <span id="prog">0 of 4 filled</span>
+  </div>
+</header>
+
+<section>
+  <h2><span class="n">1</span>The decision — and what the qualitative work found</h2>
+  <p class="hint">If nothing would be done differently depending on the answer, the survey is not worth
+  running. Write the decision first, then who you will ask. A survey usually comes AFTER qualitative work, so
+  add what your interviews or focus groups surfaced — the patterns the survey will test at scale.</p>
+  <p class="hint" style="margin-top:6px">No topic yet? Pick one of ours to try the tool:
+    <button class="btn" type="button" data-ex="travel" style="padding:4px 10px;font-size:14px">✈️ travel</button>
+    <button class="btn" type="button" data-ex="food" style="padding:4px 10px;font-size:14px">🥤 food or drink</button>
+  </p>
+  <div class="grid2">
+    <div>
+      <label class="f" for="topic">Product, brand or topic</label>
+      <input type="text" id="topic" data-k placeholder="e.g. a coffee subscription for students">
+      <label class="f" for="decision">What will be decided with the answers</label>
+      <textarea id="decision" data-k placeholder="e.g. whether to launch a 9.90 monthly plan, and with which two benefits"></textarea>
+      <label class="f" for="qual">What the qualitative research found (the patterns to test)</label>
+      <textarea id="qual" data-k placeholder="e.g. Interviews suggested price matters less than feeling the café is 'theirs'; two people mentioned the morning queue as the real barrier."></textarea>
+    </div>
+    <div>
+      <label class="f" for="pop">Who exactly answers</label>
+      <input type="text" id="pop" data-k placeholder="e.g. students who buy coffee outside home every week">
+      <label class="f" for="reach">How you reach them</label>
+      <input type="text" id="reach" data-k placeholder="e.g. WhatsApp groups and a QR on campus">
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2><span class="n">2</span>What you need to learn → analysis → scale</h2>
+  <p class="hint">Start with three; add more if a decision really needs them. For each line, choose the
+  <b>analysis</b> it will end in — and the line underneath tells you the <b>scale level</b> the question must use
+  (nominal, ordinal, interval or ratio) and how to write it. This is 5.4: the analysis decides the scale, so
+  decide the analysis first. A line with no analysis does not become a question.</p>
+  <div id="needs"></div>
+  <div class="row" style="margin-top:4px">
+    <button class="btn" type="button" id="btnAddNeed">+ Add another concept to measure</button>
+    <span class="hint" id="needCount"></span>
+  </div>
+  <div class="rules"><b>The rule behind this step</b>Every question maps to one concept you need to learn, one
+  analysis and therefore one scale level. If you cannot name the analysis, the question is not ready. Pick the
+  highest scale the concept honestly supports — no higher.</div>
+</section>
+
+<section>
+  <h2><span class="n">3</span>Length and blocks</h2>
+  <div class="grid2">
+    <div>
+      <label class="f" for="n">How many questions, without demographics</label>
+      <select id="n" data-k><option>8</option><option selected>12</option><option>15</option></select>
+      <p class="hint" id="mins">About 4 minutes to answer.</p>
+    </div>
+    <div>
+      <label class="f" for="lang">Language</label>
+      <select id="lang" data-k><option selected>English</option><option>Spanish</option></select>
+    </div>
+  </div>
+  <p class="hint" style="margin-top:14px">Blocks to include, in this order:</p>
+  <div class="opts" id="blocks"></div>
+  <p class="hint" style="margin-top:14px">Demographics at the end (only the ones you will cross by):</p>
+  <div class="opts" id="demos"></div>
+  <div class="rules"><b>The scale IS the decision (5.4)</b>Choose the level each question needs: NOMINAL (a list,
+  for frequencies), ORDINAL (a rank, for the median), INTERVAL (a balanced labelled rating, for the mean and
+  the t-test) or RATIO (a number with a true zero). Pick the highest the concept honestly supports, no higher
+  — you can always collapse a rating into bands later, but you can never recover detail you did not ask for.
+  Ratings are balanced and labelled at every point, always in the same direction.</div>
+</section>
+
+<section>
+  <h2><span class="n">4</span>The prompt</h2>
+  <p class="hint">Copy it into Claude, ChatGPT or Gemini. What comes back is a draft: you cut it to the
+  number of questions you asked for, and you check it against the faults of the test.</p>
+  <div class="row">
+    <button class="btn solid" id="btnBuild">Write my prompt</button>
+    <button class="btn" id="btnCopy">Copy</button>
+    <button class="btn" id="btnPrint" style="font-weight:400">Print or save as PDF</button>
+    <span class="hint" id="copyState"></span>
+  </div>
+  <pre class="prompt" id="prompt">Fill in the three steps and press "Write my prompt".</pre>
+  <div class="note"><b>Then check what it wrote.</b> A model writes a fluent questionnaire in seconds and
+  will hand you leading questions, vague scales and demographics at the top. The six checks below are the
+  minimum before anybody answers it.</div>
+  <div id="checks"></div>
+  <div class="score" id="score">0 of 6 checked.</div>
+</section>
+
+<section id="deliver">
+  <h2><span class="n">5</span>Your work</h2>
+  <p class="hint">Paste the questionnaire you kept after cutting the draft, say what you deleted and why,
+  and download the PDF. Everything here saves in this browser as you type.</p>
+  <div class="grid2">
+    <div>
+      <label class="f" for="names">Names of the pair</label>
+      <input type="text" id="names" data-k placeholder="e.g. Marta Ruiz and Alex Chen">
+    </div>
+    <div>
+      <label class="f" for="group">Group</label>
+      <input type="text" id="group" data-k placeholder="e.g. Group C">
+    </div>
+  </div>
+  <label class="f" for="draft">The questionnaire you are keeping</label>
+  <textarea id="draft" data-k style="min-height:220px" placeholder="Paste here what the assistant wrote, already cut to the length you asked for and with your corrections."></textarea>
+  <label class="f" for="cuts">The three questions you deleted, each with the fault it had</label>
+  <textarea id="cuts" data-k placeholder="1. ...&#10;2. ...&#10;3. ..."></textarea>
+  <label class="f" for="rewrite">The one you rewrote: before, after, and why</label>
+  <textarea id="rewrite" data-k placeholder="Before: ...&#10;After: ...&#10;Why: ..."></textarea>
+  <div class="row">
+    <button class="btn solid" id="btnPdf">Download the PDF</button>
+    <button class="btn" id="btnClear" style="font-weight:400">Start again</button>
+    <span class="hint" id="saveState">Saved in this browser.</span>
+  </div>
+</section>
+
+<div id="printout"></div>
+
+<footer>Estudios de Mercado I · 18809 · Tema 5 — Questionnaire design, scales (5.4). The decisions are yours; the draft is the assistant's. Nothing you type leaves this browser.</footer>
+</div>
+
+<script>
+const $ = (s) => document.querySelector(s);
+const KEY = 'questionnaire-lab.v1';
+const ANALYSES = [
+  { label: 'a frequency table — needs a NOMINAL scale',
+    what: 'Counts and percentages of each answer, and the mode. The first table of any report: "62% use the phone".',
+    needs: 'A NOMINAL question: unordered categories (a list of options, or yes/no). Nothing to average or rank.' },
+  { label: 'a median or a ranking — needs an ORDINAL scale',
+    what: 'Order and rank: the median, the quartiles, which option comes first. The gaps between ranks are not equal.',
+    needs: 'An ORDINAL question: ranked categories or a rank-these order (1st / 2nd / 3rd). Do not average a rank.' },
+  { label: 'a mean (average score) — needs an INTERVAL scale',
+    what: 'The average of a rating, with its standard deviation, which tells you how divided the room is.',
+    needs: 'An INTERVAL question: a balanced rating scale labelled at every point (e.g. 1–5 or 1–7 agree/importance). Equal gaps, so you may average it.' },
+  { label: 'a count or exact amount — needs a RATIO scale',
+    what: 'A real number you can do anything with, including ratios: 10 hours is genuinely twice 5.',
+    needs: 'A RATIO question: a number with a true zero (hours per week, euros, times per week). Ask for the number or non-overlapping bands.' },
+  { label: 'a crosstab + chi-square (one group against another)',
+    what: 'The same question split by a second one: "of the first-years, 70% say price; of the final-years, 40%". Chi-square says whether the gap is real.',
+    needs: 'Two categorical (NOMINAL or ORDINAL) questions with a few categories each; one is usually a demographic.' },
+  { label: 'a comparison of means / t-test (two groups, one rating)',
+    what: 'The average of the same rating in two groups, to see whether one scores it higher.',
+    needs: 'One INTERVAL rating, plus a NOMINAL question that splits people into two groups.' },
+  { label: 'a correlation (two ratings that move together)',
+    what: 'Whether two ratings rise and fall together, and how strongly. It does not prove that one causes the other.',
+    needs: 'Two INTERVAL ratings on the same scale, answered by the same person.' },
+];
+const BLOCKS = [
+  ['screener', 'Screener', 'Sends away anybody outside the population'],
+  ['behaviour', 'Behaviour', 'What they do now, with a reference period'],
+  ['ratings', 'Ratings', 'The 1 to 5 block on what drives the decision'],
+  ['barriers', 'Barriers', 'What stops them, asked without leading'],
+  ['price', 'Price', 'What they pay now and what feels too expensive'],
+  ['intention', 'Intention', 'One question, flagged as the weak measure it is'],
+  ['open', 'One open question', 'At the end, for what the scales missed'],
+];
+const DEMOS = [
+  ['age', 'Age band', 'under 18 / 18-20 / 21-23 / 24-26 / 27+'],
+  ['gender', 'Gender', 'with a prefer-not-to-say option'],
+  ['year', 'Year or occupation', 'year of study, or occupation'],
+  ['budget', 'Budget for the category', 'in bands, never open'],
+  ['place', 'Where they live', 'campus / city / commuting'],
+];
+
+const val = (id) => (document.getElementById(id) ? document.getElementById(id).value.trim() : '');
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const load = () => { try { return JSON.parse(localStorage.getItem(KEY) || 'null') || {}; } catch (e) { return {}; } };
+let S = load();
+S.needs = S.needs || [{ t: '', a: 0 }, { t: '', a: 1 }, { t: '', a: 2 }];
+S.blocks = S.blocks || { screener: true, behaviour: true, ratings: true, barriers: true, intention: true, open: true };
+S.demos = S.demos || { age: true, year: true };
+S.checked = S.checked || {};
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} };
+
+function anWhy(k) {
+  const a = ANALYSES[k] || ANALYSES[0];
+  return '<b>What it is:</b> ' + esc(a.what) + ' <b>So the question has to be:</b> ' + esc(a.needs);
+}
+
+function needRows() {
+  $('#needs').innerHTML = S.needs.map((nd, i) => `<div class="need">
+      <div><label class="f" for="need${i}">${i + 1}. I need to learn...</label>
+        <input type="text" id="need${i}" data-need="${i}" value="${esc(nd.t || '')}"
+        placeholder="${['whether price is the barrier above 10 euros','which benefit matters most','who is willing to try it'][i] || ''}"></div>
+      <div><label class="f" for="an${i}">and it ends in</label>
+        <select id="an${i}" data-an="${i}">${ANALYSES.map((a, k) => `<option value="${k}" ${Number(nd.a) === k ? 'selected' : ''}>${esc(a.label)}</option>`).join('')}</select></div>
+    </div>
+    <p class="hint anwhy" id="anwhy${i}" style="margin:6px 0 2px">${anWhy(Number(nd.a) || 0)}</p>`).join('');
+}
+
+function boxes(where, list, store) {
+  $(where).innerHTML = list.map(([id, name, what]) => `<label class="chk ${store[id] ? 'on' : ''}">
+      <input type="checkbox" ${store[id] ? 'checked' : ''} data-box="${id}">
+      <span><b>${esc(name)}</b><br><span class="hint">${esc(what)}</span></span></label>`).join('');
+}
+
+const CHECKS = [
+  'Every question answers one of my three lines. The rest are gone.',
+  'No question joins two ideas, and none of them suggests its answer.',
+  'Every rating is a labelled 1 to 5, the same way round in all of them.',
+  'Facts are asked as numbers or bands, with a reference period.',
+  'The screener is first and the demographics are last.',
+  'I timed it: under five minutes on a phone.',
+];
+
+function checkRows() {
+  $('#checks').innerHTML = CHECKS.map((c, i) => `<label class="check">
+      <input type="checkbox" data-chk="${i}" ${S.checked[i] ? 'checked' : ''}><span>${esc(c)}</span></label>`).join('');
+  scoreChecks();
+}
+
+function scoreChecks() {
+  const n = Object.values(S.checked).filter(Boolean).length;
+  $('#score').textContent = n + ' of ' + CHECKS.length + ' checked.' +
+    (n === CHECKS.length ? ' It can go out.' : ' Each unticked box is a question to rewrite.');
+}
+
+function progress() {
+  let done = 0;
+  if (val('topic') && val('decision')) done++;
+  if (S.needs.some((x) => (x.t || '').trim())) done++;
+  if (Object.values(S.blocks).some(Boolean)) done++;
+  if ($('#prompt').textContent.length > 400) done++;
+  $('#prog').textContent = done + ' of 4 filled';
+  const n = Number(val('n') || 12);
+  $('#mins').textContent = 'About ' + Math.max(2, Math.round(n * 20 / 60)) + ' minutes to answer.';
+}
+
+function buildPrompt() {
+  const n = val('n') || '12';
+  const needs = S.needs.filter((x) => (x.t || '').trim());
+  const blocks = BLOCKS.filter(([id]) => S.blocks[id]);
+  const demos = DEMOS.filter(([id]) => S.demos[id]);
+  const p = [];
+  p.push('You are helping me draft a questionnaire for a marketing research project (Estudios de Mercado I, Tema 5). Follow these rules exactly; they are the rules of the course and they are not open to interpretation. The key rule is that each question must use the scale level its intended analysis needs (nominal, ordinal, interval or ratio).');
+  p.push('');
+  p.push('THE BRIEF');
+  p.push('- Topic: ' + (val('topic') || '(not stated)'));
+  p.push('- The decision it has to inform: ' + (val('decision') || '(not stated)'));
+  if (val('qual')) p.push('- What the earlier qualitative research found (patterns to test at scale): ' + val('qual'));
+  p.push('- Who answers: ' + (val('pop') || '(not stated)'));
+  p.push('- How it is distributed: ' + (val('reach') || '(not stated)'));
+  p.push('- Length: ' + n + ' questions, not counting the screener and the demographics.');
+  p.push('- Language: ' + (val('lang') || 'English') + '.');
+  p.push('');
+  if (needs.length) {
+    p.push('WHAT I NEED TO LEARN, AND WHERE EACH LINE ENDS');
+    needs.forEach((nd, i) => p.push('  ' + (i + 1) + '. ' + nd.t.trim() + '  ->  ' + ANALYSES[Number(nd.a) || 0].label));
+    p.push('Every question must serve one of these lines. If a question serves none of them, leave it out and say so at the end.');
+    p.push('');
+  }
+  p.push('RULES FOR THE WORDING');
+  p.push('1. One idea per question: never two joined by "and" or "or".');
+  p.push('2. Nothing leading or loaded: the question must not suggest an answer, and no sentence before it may say what other people do.');
+  p.push('3. The words the respondent uses, not the company\'s. No jargon.');
+  p.push('4. Any question about behaviour carries a reference period ("in a normal week", "in the last 7 days"), never "usually" or "often".');
+  p.push('5. Nothing that depends on memory people do not have: ask about a normal week, not about the last six months.');
+  p.push('6. Nothing is taken for granted: if a question only applies to some people, put a filter question before it.');
+  p.push('');
+  p.push('RULES FOR THE ANSWERS (match the scale LEVEL to the analysis — this is 5.4)');
+  p.push('7. Each question uses the scale level its analysis needs: a list of unordered options for a frequency (NOMINAL); a rank or ordered categories for a median (ORDINAL); a balanced labelled rating for a mean, t-test or correlation (INTERVAL); a number or non-overlapping bands for a count (RATIO).');
+  p.push('8. Every interval rating is balanced and labelled at every point, always in the same direction (for example 1 = strongly disagree ... 5 = strongly agree). Keep the same scale length across the whole questionnaire; never use an unlabelled slider.');
+  p.push('9. Facts are asked as a number or as bands that do not overlap and cover every case.');
+  p.push('10. Choices are asked with a list, with "other, please specify" when the list may be incomplete.');
+  p.push('11. Offer "don\'t know" or "not applicable" wherever somebody could honestly have no answer.');
+  p.push('');
+  p.push('STRUCTURE');
+  p.push('12. A three-line introduction: who is asking, why, how long it takes, and that the answers are anonymous.');
+  if (blocks.length) {
+    p.push('13. Blocks, in this order:');
+    blocks.forEach(([id, name, what]) => p.push('    - ' + name + ': ' + what));
+  }
+  p.push((blocks.length ? '14' : '13') + '. Demographics at the very end, in bands:');
+  if (demos.length) demos.forEach(([id, name, what]) => p.push('    - ' + name + ' (' + what + ')'));
+  else p.push('    - none');
+  p.push('');
+  p.push('WHAT TO GIVE ME BACK');
+  p.push('A. The questionnaire, numbered, with the exact answer options for every question.');
+  p.push('B. One line per question: which of my needs it serves and which table it feeds.');
+  p.push('C. The three questions you are least sure about, and why.');
+  p.push('');
+  p.push('Do not exceed ' + n + ' questions, do not invent data or benchmarks, and do not put the demographics at the beginning.');
+  $('#prompt').textContent = p.join('\n');
+  progress();
+}
+
+// ---------------------------------------------------------------- wiring
+document.addEventListener('input', (e) => {
+  const t = e.target;
+  if (t.dataset.k !== undefined) { S[t.id] = t.value; save(); progress();
+    const st = document.getElementById('saveState'); if (st) { st.textContent = 'Saved.'; clearTimeout(window.__sv); window.__sv = setTimeout(() => { st.textContent = 'Saved in this browser.'; }, 1200); } }
+  if (t.dataset.need !== undefined) { S.needs[t.dataset.need].t = t.value; save(); progress(); }
+  if (t.dataset.an !== undefined) { S.needs[t.dataset.an].a = Number(t.value); save();
+    const el = document.getElementById('anwhy' + t.dataset.an); if (el) el.innerHTML = anWhy(Number(t.value)); }
+});
+document.addEventListener('change', (e) => {
+  const b = e.target.dataset.box;
+  if (b !== undefined) {
+    const store = DEMOS.some(([id]) => id === b) ? S.demos : S.blocks;
+    store[b] = e.target.checked; save();
+    e.target.closest('.chk').classList.toggle('on', e.target.checked);
+  }
+  if (e.target.dataset.chk !== undefined) { S.checked[e.target.dataset.chk] = e.target.checked; save(); scoreChecks(); }
+  if (e.target.dataset.an !== undefined) { S.needs[e.target.dataset.an].a = Number(e.target.value); save();
+    const el = document.getElementById('anwhy' + e.target.dataset.an); if (el) el.innerHTML = anWhy(Number(e.target.value)); }
+});
+$('#btnBuild').addEventListener('click', buildPrompt);
+$('#btnCopy').addEventListener('click', () => {
+  navigator.clipboard.writeText($('#prompt').textContent)
+    .then(() => { $('#copyState').textContent = 'Copied.'; })
+    .catch(() => { $('#copyState').textContent = 'Select it and copy by hand.'; });
+});
+$('#btnPrint').addEventListener('click', () => window.print());
+
+
+// ---------------------------------------------------------------- the PDF
+function buildPrint() {
+  const needs = S.needs.filter((x) => (x.t || '').trim());
+  const blocks = BLOCKS.filter(([id]) => S.blocks[id]).map(([id, name]) => name);
+  const demos = DEMOS.filter(([id]) => S.demos[id]).map(([id, name]) => name);
+  const ticked = CHECKS.filter((c, i) => S.checked[i]);
+  const missing = CHECKS.filter((c, i) => !S.checked[i]);
+  const blk = (t, body) => `<div class="blk"><b>${t}</b>${body}</div>`;
+  let h = `<h1>Questionnaire lab &middot; Estudios de Mercado I &middot; Tema 5 (5.4)</h1>
+    <div class="id"><b>Names</b> ${esc(val('names') || '\u2014')} &nbsp; <b>Group</b> ${esc(val('group') || '\u2014')}
+    &nbsp; <b>Date</b> ${new Date().toLocaleDateString()}</div>`;
+  h += '<h2>1. The decision</h2>';
+  h += blk('Topic', esc(val('topic') || '\u2014'));
+  h += blk('What will be decided', esc(val('decision') || '\u2014'));
+  h += blk('Who answers, and how', esc(val('pop') || '\u2014') + ' &middot; ' + esc(val('reach') || '\u2014'));
+  h += '<h2>2. What we need to learn</h2>';
+  h += needs.length
+    ? needs.map((nd, i) => blk('Line ' + (i + 1), esc(nd.t.trim()) + '<br><i>ends in ' + esc(ANALYSES[Number(nd.a) || 0].label) + '</i>')).join('')
+    : blk('Lines', '\u2014');
+  h += '<h2>3. Length and blocks</h2>';
+  h += blk('Length', (val('n') || '12') + ' questions, about ' + Math.max(2, Math.round(Number(val('n') || 12) * 20 / 60)) + ' minutes, in ' + esc(val('lang') || 'English'));
+  h += blk('Blocks', blocks.join(' &middot; ') || '\u2014');
+  h += blk('Demographics', demos.join(' &middot; ') || '\u2014');
+  h += '<h2>4. The prompt we used</h2>';
+  h += '<pre>' + esc($('#prompt').textContent) + '</pre>';
+  h += '<h2>5. The questionnaire we are keeping</h2>';
+  h += '<pre>' + esc(val('draft') || '(not pasted)') + '</pre>';
+  h += blk('Deleted, and why', esc(val('cuts') || '\u2014').replace(/\n/g, '<br>'));
+  h += blk('Rewritten', esc(val('rewrite') || '\u2014').replace(/\n/g, '<br>'));
+  h += '<h2>6. The checks</h2>';
+  h += blk('Ticked (' + ticked.length + ' of ' + CHECKS.length + ')', ticked.map(esc).join('<br>') || '\u2014');
+  if (missing.length) h += blk('Still to fix', missing.map(esc).join('<br>'));
+  h += '<div class="foot">Questionnaire lab &middot; Estudios de Mercado I &middot; Tema 5 (5.4) &middot; the decisions are the student\'s, the draft is the assistant\'s.</div>';
+  $('#printout').innerHTML = h;
+}
+
+$('#btnPdf').addEventListener('click', () => { buildPrompt(); buildPrint(); window.print(); });
+window.addEventListener('beforeprint', () => { buildPrint(); });
+$('#btnClear').addEventListener('click', () => {
+  if (!confirm('Clear everything on this page?')) return;
+  try { localStorage.removeItem(KEY); } catch (e) {}
+  location.reload();
+});
+
+['topic', 'decision', 'qual', 'pop', 'reach', 'n', 'lang', 'names', 'group', 'draft', 'cuts', 'rewrite'].forEach((id) => {
+  if (S[id] !== undefined && document.getElementById(id)) document.getElementById(id).value = S[id];
+});
+
+// add another concept to measure (step 2)
+function needCount(){ const el=document.getElementById('needCount'); if(el) el.textContent = S.needs.length + ' concept' + (S.needs.length===1?'':'s') + ' so far'; }
+$('#btnAddNeed').addEventListener('click', () => { S.needs.push({ t:'', a:0 }); save(); needRows(); needCount(); progress(); });
+
+// example topics (step 1) for teams with no topic of their own
+const EXAMPLES = {
+  travel: { topic:'A weekend-trip app for young solo travellers', decision:'whether to launch it and with which single hook (price, safety, or meeting people)', qual:'Interviews suggested the real barrier is feeling alone, not money; two people said they would go if a small group was already going.' },
+  food:   { topic:'A high-protein snack for students between classes', decision:'whether to launch it and at which price, and which benefit to lead with', qual:'Interviews suggested convenience beats health claims; the barrier is price versus a normal snack, and taste scepticism about "protein" products.' }
+};
+document.querySelectorAll('[data-ex]').forEach((b) => b.addEventListener('click', () => {
+  const e = EXAMPLES[b.dataset.ex]; if(!e) return;
+  ['topic','decision','qual'].forEach((k) => { const el=document.getElementById(k); if(el){ el.value=e[k]; S[k]=e[k]; } });
+  save(); progress();
+}));
+
+needRows(); boxes('#blocks', BLOCKS, S.blocks); boxes('#demos', DEMOS, S.demos); checkRows(); progress(); needCount();
+</script>
+</body>
+</html>
