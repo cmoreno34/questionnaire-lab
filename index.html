@@ -105,8 +105,8 @@ footer{margin-top:26px;color:var(--muted);font-size:14.5px}
   <b>around those objectives</b> — not a generic template. Two prompts do it in order: the first proposes the
   <b>structure</b>, the second writes the <b>questionnaire and a script that builds the Form</b>.</p>
   <div class="plan">
-    <span>1 · qualitative in</span><span>2 · objectives</span><span>3 · measure → scale</span><span>4 · length</span><span>5 · prompt 1: structure</span><span>6 · prompt 2: the Form</span>
-    <span id="prog">0 of 6 filled</span>
+    <span>1 · qualitative in</span><span>2 · objectives</span><span>3 · length</span><span>4 · prompt 1: structure</span><span>5 · prompt 2: the Form</span>
+    <span id="prog">0 of 5 filled</span>
   </div>
 </header>
 
@@ -151,31 +151,36 @@ footer{margin-top:26px;color:var(--muted);font-size:14.5px}
   <div id="objs"></div>
   <div class="row" style="margin-top:4px">
     <button class="btn sm" type="button" id="btnAddObj">+ Add an objective</button>
-    <button class="btn sm" type="button" id="btnSeedObj">Suggest from the decision</button>
+    <button class="btn sm" type="button" id="btnSeedObj">Quick suggest (no AI)</button>
     <span class="hint" id="objCount"></span>
   </div>
+
+  <div style="margin-top:14px;border-top:1px solid var(--line);padding-top:12px">
+    <p class="hint">Or let the assistant <b>draft the objectives from your project</b>: this prompt reads your brief
+    and your qualitative report and proposes them. Run it, then paste its answer back and press Fill — the boxes
+    above populate and stay editable (and save in this browser).</p>
+    <div class="row" style="margin-top:4px">
+      <button class="btn solid" id="btnObjPrompt">✍ Write a prompt to extract the objectives</button>
+      <button class="btn" id="btnCopyObj">Copy</button>
+      <button class="btn" id="btnDlObj" title="Download this prompt as its own file">⬇</button>
+      <span class="hint" id="copyObjState"></span>
+    </div>
+    <pre class="prompt" id="promptObj" style="max-height:240px">Fill the brief and load your report above, then press the button.</pre>
+    <label class="f" for="objPaste">Paste the objectives the assistant returned (one per line)</label>
+    <textarea id="objPaste" style="min-height:90px" placeholder="1. ...&#10;2. ...&#10;3. ..."></textarea>
+    <div class="row" style="margin-top:6px">
+      <button class="btn solid" id="btnFillObj">Fill the objectives above ↑ (editable)</button>
+      <span class="hint" id="fillObjState"></span>
+    </div>
+  </div>
+
   <div class="rules"><b>The rule behind this step</b>An objective is answerable and tied to the decision — "find
   out how much students will pay, and which of two benefits moves intention most", not "understand students".
   Every section and every question must trace back to one objective, or it is cut.</div>
 </section>
 
 <section>
-  <h2><span class="n">3</span>What you need to measure → analysis → scale</h2>
-  <p class="hint">For each thing you must measure, choose the <b>analysis</b> it ends in — the line underneath
-  fixes the <b>scale level</b> the question must use. This is 5.4: the analysis decides the scale. Tie each one
-  to an objective above.</p>
-  <div id="needs"></div>
-  <div class="row" style="margin-top:4px">
-    <button class="btn sm" type="button" id="btnAddNeed">+ Add another concept to measure</button>
-    <span class="hint" id="needCount"></span>
-  </div>
-  <div class="rules"><b>The rule behind this step</b>Every question maps to one concept, one analysis and
-  therefore one scale level. If you cannot name the analysis, the question is not ready. Pick the highest scale
-  the concept honestly supports — no higher.</div>
-</section>
-
-<section>
-  <h2><span class="n">4</span>Length, language and demographics</h2>
+  <h2><span class="n">3</span>Length, language and demographics</h2>
   <div class="grid2">
     <div>
       <label class="f" for="n">How many questions, without demographics</label>
@@ -196,28 +201,30 @@ footer{margin-top:26px;color:var(--muted);font-size:14.5px}
 </section>
 
 <section>
-  <h2><span class="n">5</span>Prompt 1 — propose the structure</h2>
+  <h2><span class="n">4</span>Prompt 1 — propose the structure</h2>
   <p class="hint">This first prompt does NOT write questions. It asks the assistant to propose the
-  <b>structure</b> built around your objectives: which sections, what each measures, the analysis and scale, and
-  how many questions each holds. Run it in Claude, ChatGPT or Gemini, read the structure, tweak if you want —
-  then paste it into the box below.</p>
+  <b>structure</b> built around your objectives: which sections, what each measures, and — <b>it decides the scale
+  level for you</b> (nominal / ordinal / interval / ratio), you do not set it by hand. Run it in Claude, ChatGPT
+  or Gemini, read the structure, tweak if you want — then paste it into the box below.</p>
   <div class="row">
     <button class="btn solid" id="btnP1">Write Prompt 1</button>
     <button class="btn" id="btnCopy1">Copy</button>
+    <button class="btn" id="btnDl1" title="Download this prompt as its own file">⬇</button>
     <span class="hint" id="copy1State"></span>
   </div>
-  <pre class="prompt" id="prompt1">Fill steps 1–4, then press "Write Prompt 1".</pre>
+  <pre class="prompt" id="prompt1">Fill steps 1–3, then press "Write Prompt 1".</pre>
   <label class="f" for="structure" style="margin-top:16px">Paste the structure the assistant proposed (after any edits of yours)</label>
   <textarea id="structure" data-k style="min-height:170px" placeholder="Paste here the section-by-section structure that came back from Prompt 1. Prompt 2 builds the questionnaire from exactly this."></textarea>
 </section>
 
 <section>
-  <h2><span class="n">6</span>Prompt 2 — write the questionnaire &amp; build the Google Form</h2>
+  <h2><span class="n">5</span>Prompt 2 — write the questionnaire &amp; build the Google Form</h2>
   <p class="hint">With the structure agreed, this prompt writes the full questionnaire AND a Google Apps Script
   that builds the exact Google Form for you. Paste the structure above first.</p>
   <div class="row">
     <button class="btn solid" id="btnP2">Write Prompt 2</button>
     <button class="btn" id="btnCopy2">Copy</button>
+    <button class="btn" id="btnDl2" title="Download this prompt as its own file">⬇</button>
     <span class="hint" id="copy2State"></span>
   </div>
   <pre class="prompt" id="prompt2">Paste the structure from Prompt 1 above, then press "Write Prompt 2".</pre>
@@ -238,11 +245,11 @@ footer{margin-top:26px;color:var(--muted);font-size:14.5px}
   <div id="checks"></div>
   <div class="score" id="score">0 of 6 checked.</div>
   <div class="row">
-    <button class="btn solid" id="btnDownload">⬇ Download everything (.txt)</button>
+    <button class="btn solid" id="btnDownload">⬇ Download the files (separate)</button>
     <button class="btn" id="btnClear" style="font-weight:400">Start again</button>
     <span class="hint" id="saveState">Saved in this browser.</span>
   </div>
-  <p class="hint" style="margin-top:6px">The download holds your brief, objectives, both prompts and the Google Forms steps — that is what the lab produces. Running them and building the Form is your work from here.</p>
+  <p class="hint" style="margin-top:6px">Saves each piece as its own file: the objectives prompt, the structure prompt (Prompt 1), the questionnaire prompt (Prompt 2) and the Google Forms steps. Running them and building the Form is your work from here.</p>
 </section>
 
 <footer>Estudios de Mercado I · 18809 · Tema 5 — Questionnaire design, scales (5.4). The decisions are yours; the draft is the assistant's. Nothing you type leaves this browser.</footer>
@@ -292,11 +299,6 @@ S.demos = S.demos || { age: true, year: true };
 S.checked = S.checked || {};
 const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} };
 
-function anWhy(k) {
-  const a = ANALYSES[k] || ANALYSES[0];
-  return '<b>What it is:</b> ' + esc(a.what) + ' <b>So the question has to be:</b> ' + esc(a.needs);
-}
-
 /* ---------- objectives (step 2) ---------- */
 function objRows() {
   $('#objs').innerHTML = S.objectives.map((o, i) => `<div class="objrow">
@@ -308,16 +310,27 @@ function objRows() {
 }
 function objCount(){ const el=$('#objCount'); if(el) el.textContent = S.objectives.length + ' objective' + (S.objectives.length===1?'':'s'); }
 
-/* ---------- needs → analysis → scale (step 3) ---------- */
-function needRows() {
-  $('#needs').innerHTML = S.needs.map((nd, i) => `<div class="need">
-      <div><label class="f" for="need${i}">${i + 1}. I need to measure...</label>
-        <input type="text" id="need${i}" data-need="${i}" value="${esc(nd.t || '')}"
-        placeholder="${['whether price is the barrier above 10 euros','which benefit matters most','who is willing to try it'][i] || ''}"></div>
-      <div><label class="f" for="an${i}">and it ends in</label>
-        <select id="an${i}" data-an="${i}">${ANALYSES.map((a, k) => `<option value="${k}" ${Number(nd.a) === k ? 'selected' : ''}>${esc(a.label)}</option>`).join('')}</select></div>
-    </div>
-    <p class="hint anwhy" id="anwhy${i}" style="margin:6px 0 2px">${anWhy(Number(nd.a) || 0)}</p>`).join('');
+/* objectives: draft-from-report prompt + fill-from-paste */
+function buildObjPrompt() {
+  const p = [];
+  p.push('You are helping me set the RESEARCH OBJECTIVES for a marketing survey (Estudios de Mercado I, Tema 5).');
+  p.push('');
+  briefLines(p);
+  p.push('');
+  if (val('qual')) { p.push('MY QUALITATIVE REPORT (interviews / focus groups):'); p.push(val('qual')); p.push(''); }
+  p.push('From the decision and the qualitative report, propose 3 to 5 RESEARCH OBJECTIVES the survey must achieve.');
+  p.push('Each objective must be specific and answerable (e.g. "measure how much students will pay per month, and the point it feels too expensive"), tied to the decision, and traceable to a pattern in the report.');
+  p.push('Output ONLY the objectives, one per line, numbered 1., 2., 3. — no preamble and no extra text, so I can paste them straight back.');
+  $('#promptObj').textContent = p.join('\n');
+  progress();
+}
+function fillObjectives() {
+  const raw = ($('#objPaste').value || '').split(/\n+/)
+    .map((s) => s.replace(/^\s*(\d+[\.\)]|[-*•])\s*/, '').trim()).filter(Boolean);
+  if (!raw.length) { $('#fillObjState').textContent = 'Paste the objectives first.'; return; }
+  S.objectives = raw.slice(0, 6).map((t) => ({ t }));
+  save(); objRows(); progress();
+  $('#fillObjState').textContent = 'Filled ' + S.objectives.length + ' — edit them above.';
 }
 
 function boxes(where, list, store) {
@@ -349,11 +362,10 @@ function progress() {
   let done = 0;
   if (val('topic') && val('decision')) done++;
   if (S.objectives.some((x) => (x.t || '').trim())) done++;
-  if (S.needs.some((x) => (x.t || '').trim())) done++;
   if (val('n')) done++;
   if ($('#prompt1').textContent.length > 400) done++;
   if ($('#prompt2').textContent.length > 400) done++;
-  $('#prog').textContent = done + ' of 6 filled';
+  $('#prog').textContent = done + ' of 5 filled';
   const n = Number(val('n') || 12);
   $('#mins').textContent = 'About ' + Math.max(2, Math.round(n * 20 / 60)) + ' minutes to answer.';
 }
@@ -377,7 +389,6 @@ function objectiveLines(p) {
 /* ---------- Prompt 1: the structure ---------- */
 function buildPrompt1() {
   const n = val('n') || '12';
-  const needs = S.needs.filter((x) => (x.t || '').trim());
   const demos = DEMOS.filter(([id]) => S.demos[id]);
   const p = [];
   p.push('You are helping me design a SURVEY QUESTIONNAIRE for a marketing research project (Estudios de Mercado I, Tema 5). In this FIRST step, propose ONLY the STRUCTURE — do not write the final questions yet.');
@@ -387,11 +398,6 @@ function buildPrompt1() {
   if (val('qual')) { p.push('WHAT THE QUALITATIVE RESEARCH FOUND (the patterns to test at scale):'); p.push(val('qual')); p.push(''); }
   objectiveLines(p);
   p.push('');
-  if (needs.length) {
-    p.push('CONCEPTS I NEED TO MEASURE, AND WHERE EACH ONE ENDS (analysis -> scale level it forces):');
-    needs.forEach((nd, i) => p.push('  ' + (i + 1) + '. ' + nd.t.trim() + '  ->  ' + ANALYSES[Number(nd.a) || 0].label));
-    p.push('');
-  }
   p.push('LENGTH: about ' + n + ' questions, not counting the screener and the demographics.');
   if (demos.length) p.push('DEMOGRAPHICS I will cross by (keep them to the end, in bands): ' + demos.map(([id, name]) => name).join(', ') + '.');
   p.push('');
@@ -466,14 +472,11 @@ document.addEventListener('input', (e) => {
   if (t.dataset.k !== undefined) { S[t.id] = t.value; save(); progress();
     const st = $('#saveState'); if (st) { st.textContent = 'Saved.'; clearTimeout(window.__sv); window.__sv = setTimeout(() => { st.textContent = 'Saved in this browser.'; }, 1200); } }
   if (t.dataset.obj !== undefined) { S.objectives[t.dataset.obj].t = t.value; save(); progress(); }
-  if (t.dataset.need !== undefined) { S.needs[t.dataset.need].t = t.value; save(); progress(); }
 });
 document.addEventListener('change', (e) => {
   const b = e.target.dataset.box;
   if (b !== undefined) { S.demos[b] = e.target.checked; save(); e.target.closest('.chk').classList.toggle('on', e.target.checked); }
   if (e.target.dataset.chk !== undefined) { S.checked[e.target.dataset.chk] = e.target.checked; save(); scoreChecks(); }
-  if (e.target.dataset.an !== undefined) { S.needs[e.target.dataset.an].a = Number(e.target.value); save();
-    const el = $('#anwhy' + e.target.dataset.an); if (el) el.innerHTML = anWhy(Number(e.target.value)); }
 });
 document.addEventListener('click', (e) => {
   if (e.target.dataset.objdel !== undefined) {
@@ -496,13 +499,16 @@ $('#btnSeedObj').addEventListener('click', () => {
   while (si < seed.length && S.objectives.length < 4) { S.objectives.push({ t: seed[si++] }); }
   save(); objRows(); progress();
 });
-$('#btnAddNeed').addEventListener('click', () => { S.needs.push({ t: '', a: 0 }); save(); needRows(); needCount(); progress(); });
-function needCount(){ const el=$('#needCount'); if(el) el.textContent = S.needs.length + ' concept' + (S.needs.length===1?'':'s') + ' so far'; }
-
+$('#btnObjPrompt').addEventListener('click', buildObjPrompt);
+$('#btnCopyObj').addEventListener('click', () => copyPre('#promptObj', '#copyObjState'));
+$('#btnFillObj').addEventListener('click', fillObjectives);
+$('#btnDlObj').addEventListener('click', () => { if ($('#promptObj').textContent.length < 120) buildObjPrompt(); downloadFile('0_objectives_prompt.txt', $('#promptObj').textContent); });
 $('#btnP1').addEventListener('click', buildPrompt1);
 $('#btnP2').addEventListener('click', buildPrompt2);
 $('#btnCopy1').addEventListener('click', () => copyPre('#prompt1', '#copy1State'));
 $('#btnCopy2').addEventListener('click', () => copyPre('#prompt2', '#copy2State'));
+$('#btnDl1').addEventListener('click', () => { if ($('#prompt1').textContent.length < 400) buildPrompt1(); downloadFile('1_prompt_structure.txt', $('#prompt1').textContent); });
+$('#btnDl2').addEventListener('click', () => { if ($('#prompt2').textContent.length < 400) buildPrompt2(); downloadFile('2_prompt_questionnaire_and_form.txt', $('#prompt2').textContent); });
 function copyPre(sel, stateSel) {
   navigator.clipboard.writeText($(sel).textContent)
     .then(() => { $(stateSel).textContent = 'Copied.'; setTimeout(() => $(stateSel).textContent = '', 1400); })
@@ -526,48 +532,35 @@ $('#qualFile').addEventListener('change', (e) => {
   e.target.value = '';
 });
 
-/* ---------------------------------------------------------------- download */
-function downloadPlan() {
+/* ---------------------------------------------------------------- download (separate files) */
+const FORMS_STEPS = [
+  'HOW TO PUT IT IN GOOGLE FORMS',
+  '',
+  '1. FAST — run the script: script.google.com -> New project -> delete the sample code ->',
+  '   paste the Apps Script from Prompt 2 (Part 2) -> Run -> authorise your Google account the',
+  '   first time. It creates the Form in your Drive; the link is printed in the Execution log (View > Logs).',
+  '2. BY HAND: forms.new -> add each question from Prompt 2 (Part 1) with its type',
+  '   (Multiple choice / Checkboxes / Linear scale / Short answer ...), its options, and Required where marked.',
+  '3. Open the Form, press Preview (the eye), answer it once on a phone, and time it under five minutes before sending.'
+].join('\n');
+function downloadFile(name, text) {
+  const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+}
+function downloadAll() {
   if ($('#prompt1').textContent.length < 400) buildPrompt1();
   if ($('#prompt2').textContent.length < 400) buildPrompt2();
-  const objs = S.objectives.filter((x) => (x.t || '').trim()).map((o, i) => (i + 1) + '. ' + o.t.trim()).join('\n');
-  const needs = S.needs.filter((x) => (x.t || '').trim()).map((nd, i) => (i + 1) + '. ' + nd.t.trim() + '  ->  ' + ANALYSES[Number(nd.a) || 0].label).join('\n');
-  const L = [
-    'QUESTIONNAIRE LAB  ·  Estudios de Mercado I · Tema 5 (5.4)',
-    'Date: ' + new Date().toLocaleDateString(),
-    '',
-    'BRIEF',
-    'Topic: ' + (val('topic') || ''),
-    'Decision: ' + (val('decision') || ''),
-    'Who answers: ' + (val('pop') || '') + '   |   Reach: ' + (val('reach') || ''),
-    'Language: ' + (val('lang') || 'English') + '   |   Length: ' + (val('n') || '12') + ' questions',
-    '',
-    'YOUR QUALITATIVE REPORT',
-    (val('qual') || '(none loaded)'),
-    '',
-    'RESEARCH OBJECTIVES',
-    (objs || '(none)'),
-    '',
-    'WHAT TO MEASURE  ->  ANALYSIS  ->  SCALE',
-    (needs || '(none)'),
-    '',
-    '==================== PROMPT 1 — PROPOSE THE STRUCTURE ====================',
-    $('#prompt1').textContent,
-    '',
-    '==================== PROMPT 2 — QUESTIONNAIRE & GOOGLE FORM ====================',
-    $('#prompt2').textContent,
-    '',
-    '==================== HOW TO PUT IT IN GOOGLE FORMS ====================',
-    '1. script.google.com  ->  New project  ->  delete the sample code  ->  paste the Apps Script from Prompt 2  ->  Run  ->  authorise. The Form link is printed in the Execution log (View > Logs).',
-    '2. Or forms.new and add each question from Part 1 with its type (Multiple choice, Checkboxes, Linear scale, Short answer...), options and Required.',
-    '3. Preview the Form, answer it once on a phone, and time it under five minutes before sending.'
-  ];
-  const blob = new Blob([L.join('\n')], { type: 'text/plain;charset=utf-8' });
-  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'questionnaire_plan.txt';
-  document.body.appendChild(a); a.click(); document.body.removeChild(a); setTimeout(() => URL.revokeObjectURL(a.href), 1500);
-  const st = $('#saveState'); if (st) { st.textContent = 'Downloaded.'; setTimeout(() => st.textContent = 'Saved in this browser.', 1600); }
+  const files = [];
+  if ($('#promptObj') && $('#promptObj').textContent.length > 150) files.push(['0_objectives_prompt.txt', $('#promptObj').textContent]);
+  files.push(['1_prompt_structure.txt', $('#prompt1').textContent]);
+  files.push(['2_prompt_questionnaire_and_form.txt', $('#prompt2').textContent]);
+  files.push(['3_google_forms_steps.txt', FORMS_STEPS]);
+  files.forEach((f, i) => setTimeout(() => downloadFile(f[0], f[1]), i * 400));
+  const st = $('#saveState'); if (st) { st.textContent = 'Downloaded ' + files.length + ' files.'; setTimeout(() => st.textContent = 'Saved in this browser.', 2400); }
 }
-$('#btnDownload').addEventListener('click', downloadPlan);
+$('#btnDownload').addEventListener('click', downloadAll);
 $('#btnClear').addEventListener('click', () => {
   if (!confirm('Clear everything on this page?')) return;
   try { localStorage.removeItem(KEY); } catch (e) {}
@@ -590,7 +583,7 @@ document.querySelectorAll('[data-ex]').forEach((b) => b.addEventListener('click'
   save(); progress();
 }));
 
-objRows(); needRows(); boxes('#demos', DEMOS, S.demos); checkRows(); needCount(); progress();
+objRows(); boxes('#demos', DEMOS, S.demos); checkRows(); progress();
 </script>
 </body>
 </html>
