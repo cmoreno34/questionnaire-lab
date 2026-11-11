@@ -132,15 +132,15 @@ footer{margin-top:26px;color:var(--muted);font-size:14.5px}
       <input type="text" id="reach" data-k placeholder="e.g. WhatsApp groups and a QR on campus">
     </div>
   </div>
-  <label class="f" for="qual">What the qualitative research found — paste it, or load the output of the qualitative tool</label>
-  <textarea id="qual" data-k style="min-height:150px" placeholder="Paste the themes, patterns and quotes your interview / focus-group analysis produced. The survey will test these at scale."></textarea>
-  <div class="row" style="margin-top:8px">
-    <label class="btn sm" style="cursor:pointer">⬆ Load qualitative file (.txt, .md, .csv, .json)
+  <label class="f" for="qual">Your qualitative report — <b>upload it</b> (or paste the findings)</label>
+  <div class="row" style="margin:0 0 6px">
+    <label class="btn" style="cursor:pointer">⬆ Upload your qualitative report (.txt, .md, .csv, .json)
       <input type="file" id="qualFile" accept=".txt,.md,.csv,.json,.tsv,.text" style="display:none"></label>
     <a class="btn sm" href="https://cmoreno34.github.io/qualitative-studio/" target="_blank" rel="noopener" style="text-decoration:none">open the qualitative analysis tool ↗</a>
     <span class="hint" id="qualState"></span>
   </div>
-  <p class="hint" style="margin-top:6px">From the qualitative tool, export or copy its findings and paste them here (PDF → copy the text). Everything stays in your browser.</p>
+  <textarea id="qual" data-k style="min-height:130px" placeholder="Your report loads here. Or paste the themes, patterns and quotes your interview / focus-group analysis produced — the survey will test these at scale."></textarea>
+  <p class="hint" style="margin-top:6px">A survey comes after the qualitative. Export your report from the qualitative tool (PDF → copy the text) and drop it here. Everything stays in your browser.</p>
 </section>
 
 <section>
@@ -237,38 +237,13 @@ footer{margin-top:26px;color:var(--muted);font-size:14.5px}
   before anybody answers it.</div>
   <div id="checks"></div>
   <div class="score" id="score">0 of 6 checked.</div>
-</section>
-
-<section id="deliver">
-  <h2><span class="n">7</span>Your work</h2>
-  <p class="hint">Paste the questionnaire you kept, say what you deleted and why, and download the PDF.
-  Everything here saves in this browser as you type.</p>
-  <div class="grid2">
-    <div>
-      <label class="f" for="names">Names of the pair</label>
-      <input type="text" id="names" data-k placeholder="e.g. Marta Ruiz and Alex Chen">
-    </div>
-    <div>
-      <label class="f" for="group">Group</label>
-      <input type="text" id="group" data-k placeholder="e.g. Group C">
-    </div>
-  </div>
-  <label class="f" for="formlink">Link to your Google Form (optional)</label>
-  <input type="text" id="formlink" data-k placeholder="https://forms.gle/...">
-  <label class="f" for="draft">The questionnaire you are keeping</label>
-  <textarea id="draft" data-k style="min-height:200px" placeholder="Paste here what the assistant wrote, cut to the length you asked for and with your corrections."></textarea>
-  <label class="f" for="cuts">The questions you deleted, each with the fault it had</label>
-  <textarea id="cuts" data-k placeholder="1. ...&#10;2. ...&#10;3. ..."></textarea>
-  <label class="f" for="rewrite">The one you rewrote: before, after, and why</label>
-  <textarea id="rewrite" data-k placeholder="Before: ...&#10;After: ...&#10;Why: ..."></textarea>
   <div class="row">
-    <button class="btn solid" id="btnPdf">Download the PDF</button>
+    <button class="btn solid" id="btnDownload">⬇ Download everything (.txt)</button>
     <button class="btn" id="btnClear" style="font-weight:400">Start again</button>
     <span class="hint" id="saveState">Saved in this browser.</span>
   </div>
+  <p class="hint" style="margin-top:6px">The download holds your brief, objectives, both prompts and the Google Forms steps — that is what the lab produces. Running them and building the Form is your work from here.</p>
 </section>
-
-<div id="printout"></div>
 
 <footer>Estudios de Mercado I · 18809 · Tema 5 — Questionnaire design, scales (5.4). The decisions are yours; the draft is the assistant's. Nothing you type leaves this browser.</footer>
 </div>
@@ -551,45 +526,48 @@ $('#qualFile').addEventListener('change', (e) => {
   e.target.value = '';
 });
 
-/* ---------------------------------------------------------------- the PDF */
-function buildPrint() {
-  const objs = S.objectives.filter((x) => (x.t || '').trim());
-  const needs = S.needs.filter((x) => (x.t || '').trim());
-  const demos = DEMOS.filter(([id]) => S.demos[id]).map(([id, name]) => name);
-  const ticked = CHECKS.filter((c, i) => S.checked[i]);
-  const missing = CHECKS.filter((c, i) => !S.checked[i]);
-  const blk = (t, body) => `<div class="blk"><b>${t}</b>${body}</div>`;
-  let h = `<h1>Questionnaire lab &middot; Estudios de Mercado I &middot; Tema 5 (5.4)</h1>
-    <div class="id"><b>Names</b> ${esc(val('names') || '—')} &nbsp; <b>Group</b> ${esc(val('group') || '—')}
-    &nbsp; <b>Date</b> ${new Date().toLocaleDateString()}</div>`;
-  h += '<h2>1. The decision &amp; qualitative input</h2>';
-  h += blk('Topic', esc(val('topic') || '—'));
-  h += blk('What will be decided', esc(val('decision') || '—'));
-  h += blk('Who answers, and how', esc(val('pop') || '—') + ' &middot; ' + esc(val('reach') || '—'));
-  if (val('qual')) h += blk('Qualitative findings loaded', esc(val('qual')).replace(/\n/g, '<br>'));
-  h += '<h2>2. Research objectives</h2>';
-  h += objs.length ? objs.map((o, i) => blk('Objective ' + (i + 1), esc(o.t.trim()))).join('') : blk('Objectives', '—');
-  h += '<h2>3. What we measure &rarr; scale</h2>';
-  h += needs.length
-    ? needs.map((nd, i) => blk('Line ' + (i + 1), esc(nd.t.trim()) + '<br><i>ends in ' + esc(ANALYSES[Number(nd.a) || 0].label) + '</i>')).join('')
-    : blk('Lines', '—');
-  h += '<h2>4. Length and demographics</h2>';
-  h += blk('Length', (val('n') || '12') + ' questions, about ' + Math.max(2, Math.round(Number(val('n') || 12) * 20 / 60)) + ' minutes, in ' + esc(val('lang') || 'English'));
-  h += blk('Demographics', demos.join(' &middot; ') || '—');
-  h += '<h2>5. Prompt 1 — structure</h2><pre>' + esc($('#prompt1').textContent) + '</pre>';
-  h += blk('Structure returned', esc(val('structure') || '(not pasted)').replace(/\n/g, '<br>'));
-  h += '<h2>6. Prompt 2 — questionnaire &amp; Form</h2><pre>' + esc($('#prompt2').textContent) + '</pre>';
-  if (val('formlink')) h += blk('Google Form link', esc(val('formlink')));
-  h += '<h2>7. The questionnaire we are keeping</h2><pre>' + esc(val('draft') || '(not pasted)') + '</pre>';
-  h += blk('Deleted, and why', esc(val('cuts') || '—').replace(/\n/g, '<br>'));
-  h += blk('Rewritten', esc(val('rewrite') || '—').replace(/\n/g, '<br>'));
-  h += blk('Checks ticked (' + ticked.length + ' of ' + CHECKS.length + ')', ticked.map(esc).join('<br>') || '—');
-  if (missing.length) h += blk('Still to fix', missing.map(esc).join('<br>'));
-  h += '<div class="foot">Questionnaire lab &middot; Estudios de Mercado I &middot; Tema 5 (5.4) &middot; the decisions are the student\'s, the draft is the assistant\'s.</div>';
-  $('#printout').innerHTML = h;
+/* ---------------------------------------------------------------- download */
+function downloadPlan() {
+  if ($('#prompt1').textContent.length < 400) buildPrompt1();
+  if ($('#prompt2').textContent.length < 400) buildPrompt2();
+  const objs = S.objectives.filter((x) => (x.t || '').trim()).map((o, i) => (i + 1) + '. ' + o.t.trim()).join('\n');
+  const needs = S.needs.filter((x) => (x.t || '').trim()).map((nd, i) => (i + 1) + '. ' + nd.t.trim() + '  ->  ' + ANALYSES[Number(nd.a) || 0].label).join('\n');
+  const L = [
+    'QUESTIONNAIRE LAB  ·  Estudios de Mercado I · Tema 5 (5.4)',
+    'Date: ' + new Date().toLocaleDateString(),
+    '',
+    'BRIEF',
+    'Topic: ' + (val('topic') || ''),
+    'Decision: ' + (val('decision') || ''),
+    'Who answers: ' + (val('pop') || '') + '   |   Reach: ' + (val('reach') || ''),
+    'Language: ' + (val('lang') || 'English') + '   |   Length: ' + (val('n') || '12') + ' questions',
+    '',
+    'YOUR QUALITATIVE REPORT',
+    (val('qual') || '(none loaded)'),
+    '',
+    'RESEARCH OBJECTIVES',
+    (objs || '(none)'),
+    '',
+    'WHAT TO MEASURE  ->  ANALYSIS  ->  SCALE',
+    (needs || '(none)'),
+    '',
+    '==================== PROMPT 1 — PROPOSE THE STRUCTURE ====================',
+    $('#prompt1').textContent,
+    '',
+    '==================== PROMPT 2 — QUESTIONNAIRE & GOOGLE FORM ====================',
+    $('#prompt2').textContent,
+    '',
+    '==================== HOW TO PUT IT IN GOOGLE FORMS ====================',
+    '1. script.google.com  ->  New project  ->  delete the sample code  ->  paste the Apps Script from Prompt 2  ->  Run  ->  authorise. The Form link is printed in the Execution log (View > Logs).',
+    '2. Or forms.new and add each question from Part 1 with its type (Multiple choice, Checkboxes, Linear scale, Short answer...), options and Required.',
+    '3. Preview the Form, answer it once on a phone, and time it under five minutes before sending.'
+  ];
+  const blob = new Blob([L.join('\n')], { type: 'text/plain;charset=utf-8' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'questionnaire_plan.txt';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a); setTimeout(() => URL.revokeObjectURL(a.href), 1500);
+  const st = $('#saveState'); if (st) { st.textContent = 'Downloaded.'; setTimeout(() => st.textContent = 'Saved in this browser.', 1600); }
 }
-$('#btnPdf').addEventListener('click', () => { buildPrompt1(); buildPrompt2(); buildPrint(); window.print(); });
-window.addEventListener('beforeprint', () => { buildPrint(); });
+$('#btnDownload').addEventListener('click', downloadPlan);
 $('#btnClear').addEventListener('click', () => {
   if (!confirm('Clear everything on this page?')) return;
   try { localStorage.removeItem(KEY); } catch (e) {}
@@ -597,7 +575,7 @@ $('#btnClear').addEventListener('click', () => {
 });
 
 /* restore saved simple fields */
-['topic', 'decision', 'qual', 'pop', 'reach', 'n', 'lang', 'names', 'group', 'formlink', 'structure', 'draft', 'cuts', 'rewrite'].forEach((id) => {
+['topic', 'decision', 'qual', 'pop', 'reach', 'n', 'lang', 'structure'].forEach((id) => {
   if (S[id] !== undefined && document.getElementById(id)) document.getElementById(id).value = S[id];
 });
 
